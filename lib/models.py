@@ -16,6 +16,17 @@ class Restaurant(Base):
     price = Column(Integer())
 
     reviews = relationship("Review", back_populates="restaurant")
+    customers = relationship("Customer", secondary="reviews", back_populates="restaurants")
+
+    # get all reviews for this restaurant
+    @property
+    def restaurant_reviews(self):
+        return self.reviews
+    
+    # get the customers who reviewed this restaurant
+    @property
+    def restaurant_customers(self):
+        return [review.customer for review in self.reviews]
 
 
     def __repr__(self):
@@ -31,6 +42,17 @@ class Customer(Base):
     last_name = Column(String())
 
     reviews = relationship("Review", back_populates="customer")
+    restaurants = relationship("Restaurant", secondary="reviews", back_populates="customers")
+
+    #customer reviews
+    @property
+    def customer_reviews(self):
+        return self.reviews
+    
+    #customer restaurants
+    @property
+    def customer_restaurants(self):
+        return self.restaurants
 
     def __repr__(self):
         return f'{self.first_name}, {self.last_name}'
@@ -47,6 +69,16 @@ class Review(Base):
 
     restaurant = relationship("Restaurant", back_populates="reviews")
     customer = relationship("Customer", back_populates="reviews")
+
+    #all reviews
+    def full_reviews(self):
+        return [f"Review for {self.name} by {review.customer.full_name()}: {review.star_rating} stars" for review in self.reviews]
+    
+    #instances
+    @property
+    def review_restaurant(self):
+        return self.restaurant
+
     
 
     def __repr__(self):
